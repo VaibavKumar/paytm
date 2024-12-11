@@ -4,28 +4,26 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
 export const Users = () => {
-    const [users, setUsers] = useState([
-        {
-            username: "vaibav",
-            firstName: "vk",
-            lastName: "kumar"
-        }
-    ]);
+    const [users, setUsers] = useState([]);
+    const [filteredUsers, setFilteredUsers] = useState([])
     const [filter, setFilter] = useState("");
 
     useEffect(() => {
-        const source = axios.CancelToken.source(); // Create cancel token
-        axios.get(`http://localhost:3000/api/v1/user/bulk?filter=${encodeURIComponent(filter)}`, {
-            cancelToken: source.token
-        })
-            .then(response => {
-                const users = response.data.user.map((user, index) => ({
-                    ...user,
-                    _id: user._id || index // Ensure unique IDs
-                }));
-                setUsers(users);
-            })
-    }, [filter]);
+        const id = setTimeout(() => {
+          axios.get("http://localhost:3000/api/v1/user/bulk?filter=" + filter)
+          .then(response => {
+            setUsers(response.data.user)
+            setFilteredUsers(response.data.user)
+          })
+        }, 1000)
+    
+        return () => clearTimeout(id)
+      }, [])
+
+      useEffect(() => {
+        const filteredUsers = users.filter((user) => user.firstName.toLowerCase().indexOf(filter.toLowerCase()) !== -1 )
+        setFilteredUsers(filteredUsers)
+      }, [filter])
 
     return (
         <>
@@ -43,8 +41,8 @@ export const Users = () => {
                 />
             </div>
             <div>
-                {users.map((user,key) => (
-                    <User user={user} />
+                {filteredUsers.map((user,key) => (
+                    <User user={user} key={key}/>
                 ))}
             </div>
         </>
