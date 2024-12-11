@@ -104,26 +104,23 @@ router.put("/",authmiddleware, async (req, res) => {
         message: "Updated successfully"
     })
 })
-router.get("/bulk", async (req, res) => {
-    const filter = req.query.filter || "";
+router.get('/bulk', async(req, res) => {
+    try {
+        const { filter = ""} = req.query
 
-    const users = await User.find({
-        $or: [
-            { firstName: { $regex: filter, $options: "i" } }, 
-            { lastName: { $regex: filter, $options: "i" } },
-        ],
-    })
-    console.log(users)
-    console.log(filter);
-    console.log(req.query);
-    res.json({
-        user: users.map(user => ({
-            username: user.username,
-            firstName: user.firstName,
-            lastName: user.lastName,
-            _id: user._id
-        }))
-    })
+        const users = await User.find({})  
+        
+        res.json({
+            user: users.map((user) => ({                
+                username: user.username,
+                firstName: user.firstname,
+                lastName: user.lastname,
+                _id: user._id
+            }))
+        })
+    } catch (error) {
+        res.status(500).json({ error: "An error occurred while fetching users." });
+    }
 })
 // user for searching frds or other users 
 
